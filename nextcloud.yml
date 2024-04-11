@@ -1,0 +1,69 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-4.9.4
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2024-04-11T09:52:55Z"
+  labels:
+    app: cloud-formini
+  name: cloud-formini
+spec:
+  containers:
+    - args:
+        - postgres
+      env:
+        - name: POSTGRES_PASSWORD
+          value: yourpassword
+        - name: POSTGRES_USER
+          value: nextcloud
+      image: docker.io/library/postgres:latest
+      name: nextclouddb
+      ports:
+        - containerPort: 80
+          hostPort: 9999
+      volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: 2852d957a60e7b0e0b8307b0feb16f10d7064698faf76e1d54067a3bdb94d579-pvc
+    - args:
+        - redis-server
+      image: docker.io/library/redis:latest
+      name: Nextcloudredis
+      volumeMounts:
+        - mountPath: /data
+          name: f581817194c931db1321f3f6ba0042c920c4e7e7b0282a08865f9173b63a8d80-pvc
+    - args:
+        - apache2-foreground
+      env:
+        - name: NEXTCLOUD_TRUSTED_DOMAINS
+          value: 192.168.42.133
+        - name: POSTGRES_USER
+          value: nextcloud
+        - name: NEXTCLOUD_ADMIN_USER
+          value: nextcloud
+        - name: NEXTCLOUD_ADMIN_PASSWORD
+          value: yourpassword
+        - name: POSTGRES_HOST
+          value: 127.0.0.1
+        - name: REDIS_HOST
+          value: 127.0.0.1
+        - name: POSTGRES_DB
+          value: nextcloud
+        - name: POSTGRES_PASSWORD
+          value: yourpassword
+      image: docker.io/library/nextcloud:latest
+      name: nextcloud
+      volumeMounts:
+        - mountPath: /var/www/html
+          name: fc0f81cdd2f27f7f666c28c7330a0e635f8369d7d68674aed72fa3544879cfed-pvc
+  volumes:
+    - name: 2852d957a60e7b0e0b8307b0feb16f10d7064698faf76e1d54067a3bdb94d579-pvc
+      persistentVolumeClaim:
+        claimName: 2852d957a60e7b0e0b8307b0feb16f10d7064698faf76e1d54067a3bdb94d579
+    - name: f581817194c931db1321f3f6ba0042c920c4e7e7b0282a08865f9173b63a8d80-pvc
+      persistentVolumeClaim:
+        claimName: f581817194c931db1321f3f6ba0042c920c4e7e7b0282a08865f9173b63a8d80
+    - name: fc0f81cdd2f27f7f666c28c7330a0e635f8369d7d68674aed72fa3544879cfed-pvc
+      persistentVolumeClaim:
+        claimName: fc0f81cdd2f27f7f666c28c7330a0e635f8369d7d68674aed72fa3544879cfed
